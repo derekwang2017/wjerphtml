@@ -95,7 +95,8 @@
                 async: false,
                 data: {data: JSON.stringify(data)},
                 success: function (d) {
-                    console.log(d);
+                    layer.closeAll();
+                    $("#carlist").trigger("reloadGrid");
                 }
             });
         });
