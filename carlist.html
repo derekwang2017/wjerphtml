@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #carlist{width: 900px}
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    $(function() {
+        $("#carlist").jqGrid({
+            url : rootip + "/car/list",
+            datatype : "json",
+            mtype:'POST',
+            height:'auto',
+            jsonReader: {
+                root: "rows",
+                total: "totalpages",
+                page: "currpage",
+                records: "totalrecords",
+                repeatitems: false
+            },
+            colNames:['key','车牌','车主姓名','车主电话','最近里程','操作'],
+            colModel:[
+                { name: 'hmcid', index: 'hmcid',key:true,hidden:true,search:false},
+                { name: 'hmccarplate', index: 'hmccarplate',hidden:false,search:false,width:150, align:'center'},
+                { name: 'hmcownername', index: 'hmcownername',width:150,sortable:true,search:false,searchoptions:{sopt:['cn','eq']},editable:false, align:'center'},
+                { name: 'hmcownertel', index: 'hmcownertel',hidden:false,search:false, align:'center'},
+                { name: 'hmcmile', index: 'hmcmile',hidden:false,search:false, align:'center'},
+                { name: 'btn', index: '', align:'center',width:100, sortable:false,editable:false,search:false}
+            ],
+            rowNum : 10,
+            rowList : [10, 20, 40],
+            pager : '#pager1',
+            viewrecords : true,
+            caption : "车辆列表",
+            toolbar: [true,"top"],
+            rownumbers: true,
+            rownumWidth: 40
+        });
+        
+        $("#newcar_btn").click(function () {
+            layer.open({
+                type :2,
+                title : '开单接车',
+                maxmin : false,
+                shadeClose : false,
+                area : ['400px', '520px'],
+                content : 'accesscar.html'
+            });
+        });
+    });
+</script>
+    <table id="carlist"></table> <div id="pager1"></div>
+</body>
+</html>

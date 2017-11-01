@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head> 
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+        <title>演示：jQuery后台页面左侧竖直二级导航栏</title>
+        <style type="text/css">
+            body{margin:0;padding:0;overflow-x:hidden;}
+            html, body{height:100%;}
+            img{border:none;}
+            *{font-family:'微软雅黑';font-size:12px;color:#626262;}
+            dl,dt,dd{display:block;margin:0;}
+            a{text-decoration:none;}
+            #bg{background-image:url(images/content/dotted.png);}
+            .container{width:160px;height:100%; float: left}
+            .mainbody{height: 100%; float: left}
+
+            /*left*/
+            .menus_area{width:160px;height:auto !important;overflow:visible !important;position:fixed;height:100% !important;background-color:#3992d0;}
+            .line{height:2px;width:100%;background-image:url(images/left/line_bg.png);background-repeat:repeat-x;}
+            .menus_area dt{padding-left:40px;padding-right:10px;background-repeat:no-repeat;background-position:10px center;background-color: #3992d0;color:#f5f5f5;font-size:14px;position:relative;line-height:48px;cursor:pointer;}
+            .menus_area dd{background-color:#317eb4;padding-left:40px;display: none}
+            .menus_area dd a{color:#f5f5f5;line-height:20px;}
+            .menus_area dt img{position:absolute;right:10px;top:20px;}
+            .system_log dt{background-image:url(images/left/system.png)}
+            .custom dt{background-image:url(images/left/custom.png)}
+            .channel dt{background-image:url(images/left/channel.png)}
+            .app dt{background-image:url(images/left/app.png)}
+            .cloud dt{background-image:url(images/left/cloud.png)}
+            .syetem_management dt{background-image:url(images/left/syetem_management.png)}
+            .source dt{background-image:url(images/left/source.png)}
+            .statistics dt{background-image:url(images/left/statistics.png)}
+            .menus_area dl dd:last-child{padding-bottom:10px;}
+            dt.on{background-color: #317eb4}
+
+            .first_dd{color:white;cursor:pointer}
+
+            .warehouse_btn{
+                background: #bbce28 none repeat scroll 0 0;
+                border: 1px solid #a9ba27;
+                color: #697700;
+                cursor: pointer;
+                display: inline-block;
+                float: left;
+                font-size: 14px;
+                height: 25px;
+                margin-left: 0px;
+                line-height: 25px;
+                min-width: 94px;
+                padding: 0 10px;
+                text-align: center;
+                margin-right: 10px;
+            }
+
+        </style>
+
+        <link href="css/jquery-ui-1.8.14.custom.css" rel="stylesheet" type="text/css"/>
+        <link href="css/ui.jqgrid.css" rel="stylesheet" type="text/css"/>
+        <link href="js/theme/default/layer.css" rel="stylesheet" type="text/css"/>
+        <link href="css/layui.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body id="bg">
+    <script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/layer.js"></script>
+    <script type="text/javascript" src="js/jquery.jqGrid.js"></script>
+    <script type="text/javascript" src="js/grid.locale-cn.js"></script>
+    <script type="text/javascript" src="js/layui.js"></script>
+    <script type="text/javascript">
+        //var rootip = "http://139.224.236.146:8888";
+        var rootip = "http://localhost:8888";
+        $(function() {
+            $("#menus_area").find("dt").click(function() { //一级菜单点击
+                if (!$(this).hasClass("on")) { //当前一级菜单不选中状态才切换
+                    $("#menus_area").find("dt").removeClass("on");//所有的一级菜单去除选中样式
+                    $(this).addClass("on");//当前一级菜单去除选中样式
+                    $('dd').slideUp();//所有二级菜单隐藏
+                    $(this).nextAll('dd').slideToggle();//当前所有二级菜单切换
+                }
+            });
+
+            var width = $(document).width();
+            $("#mainbody").width(width-200);
+            
+            $(".first_dd").click(function () {
+                var dataurl = $(this).attr("datahref")
+                $.ajax({
+                    url:dataurl,
+                    type:"GET",
+                    success:function(data){
+                        $("#mainbody").html(data);
+                    },
+                    error:function(XmlHttpRequest, textStatus, errorThrown){
+                        alert("error:");
+                        $("#mainbody").html("error");
+                    }
+                });
+                $(".first_dd").css("background-color","");
+                $(this).css("background-color","blue");
+            })
+            
+
+        })
+    </script>
+        <div class="container">
+            <div class="menus_area" id="menus_area">
+                <div class="line"></div>
+                <dl class="system_log">
+                    <dt>车辆管理<img src="images/left/select_xl01.png"></dt>
+                    <dd class="first_dd" datahref="onlinelist.html">在场车辆</dd>
+                    <dd class="first_dd" datahref="carlist.html">车辆查询</dd>
+                    <dd class="first_dd" datahref="rightmain.html">工单查询</dd>
+                </dl>
+
+                <dl class="custom">
+                    <dt>仓库管理<img src="images/left/select_xl01.png"></dt>
+                    <dd class="first_dd" datahref="rightmain.html">库存查询</dd>
+                    <dd class="first_dd" datahref="rightmain.html">库存记录</dd>
+                </dl>
+
+                <dl class="channel">
+                    <dt>统计查询<img src="images/left/select_xl01.png"></dt>
+                    <dd class="first_dd" datahref="rightmain.html">财务统计</dd>
+                </dl>
+
+            </div>
+        </div>
+
+        <div class="mainbody" id="mainbody">欢迎使用</div>
+    </body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在场车辆</title>
+    <style>
+        #carlistdiv{
+            width: 900px;
+            display: block;
+        }
+        .inputbaselabel{
+            font-size: 15px;
+            font-family: '微软雅黑';
+            color:#626262;
+        }
+
+        .inputbaselabel label{
+            text-align: justify;
+            text-justify:inter-ideograph;
+            display:inline-block;
+            width: 100px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    $(function() {
+        $("#carlist").jqGrid({
+            url : rootip + "/car/onlinelist",
+            datatype : "json",
+            mtype:'POST',
+            height:'auto',
+            jsonReader: {
+                root: "rows",
+                total: "totalpages",
+                page: "currpage",
+                records: "totalrecords",
+                repeatitems: false
+            },
+            colNames:['key','工单号','车牌','车主姓名','业务类别','车型','进场时间','接待人员','工单状态'],
+            colModel:[
+                { name: 'hwid', index: 'hwid',key:true,hidden:true,search:false},
+                { name: 'hwserialno', index: 'hwserialno',hidden:false,search:false,width:150, align:'center'},
+                { name: 'carplate', index: 'carplate',width:100,sortable:true,search:false,editable:false, align:'center'},
+                { name: 'carownername', index: 'carownername',width:100,hidden:false,search:false, align:'center'},
+                { name: 'businesstypename', index: 'businesstypename',width:100,hidden:false,search:false, align:'center'},
+                { name: 'cartypename', index: 'cartypename',hidden:false,search:false, align:'center'},
+                { name: 'hwenterdtm', index: 'hwenterdtm',hidden:false,search:false, align:'center'},
+                { name: 'acceptstaffname', index: 'acceptstaffname',width:100,hidden:false,search:false, align:'center'},
+                { name: 'orderstatusname', index: 'orderstatusname',width:100,hidden:false,search:false, align:'center'}
+            ],
+            rowNum : 10,
+            rowList : [10, 20, 40],
+            pager : '#pager1',
+            viewrecords : true,
+            caption : "在场车辆",
+            toolbar: [true,"top"],
+            rownumbers: true,
+            rownumWidth: 40
+        });
+        
+        $("#newcar_btn").click(function () {
+            layer.open({
+                type :1,
+                title : '开单接车',
+                maxmin : false,
+                shadeClose : false,
+                area : ['400px', '520px'],
+                content : $('#accesscardiv')
+            });
+        });
+        $("#newcar_submitbtn").click(function () {
+            var data = {};
+            data.membercarplate = $("input[name='carplate']").val();
+            data.businesstypeid = $("select[name='businesstypeselect']").val();
+            data.hwdesc = $("textarea[name='orderdesc']").val();
+
+            var carinfo = {};
+            carinfo.hmccarplate = data.membercarplate;
+            carinfo.hmcownername = $("input[name='carowner']").val();
+            carinfo.hmcownertel = $("input[name='carownerphone']").val();
+            carinfo.hmcmile = $("input[name='carmile']").val();
+            carinfo.hmccartype = $("input[name='cartype']").val();
+
+            data.carinfo = carinfo;
+            console.log(data);
+
+            $.ajax({
+                type: "POST",
+                url: rootip + "/car/acceptcar",
+                dataType: "json",
+                async: false,
+                data: {data: JSON.stringify(data)},
+                success: function (d) {
+                    console.log(d);
+                }
+            });
+        });
+        $("input[name='carplate']").change(function () {
+            $.ajax({
+                type: "POST",
+                url: rootip + "/car/getcarinfobycarplate",
+                dataType: "json",
+                async: false,
+                data: {"carplate":$(this).val()},
+                success: function (d) {
+                    if(d.status==0){
+                        $("input[name='carowner']").val(d.obj.hmcownername);
+                        $("input[name='carownerphone']").val(d.obj.hmcownertel);
+                        $("input[name='carmile']").val(d.obj.hmcmile);
+                        $("input[name='cartype']").val(d.obj.hmccartype);
+                    }
+                }
+            });
+        });
+
+
+        //设置业务类别下拉菜单
+        $.ajax({
+            type: "POST",
+            url: rootip + "/car/getbusinesstypelist",
+            dataType: "json",
+            async: false,
+            data: {},
+            success: function (d) {
+                if(d.status==0){
+                    var businesslist = d.list;
+                    for(var i=0; i<businesslist.length; i++){
+                        $("select[name='businesstypeselect']").append("<option value='" + businesslist[i].hbtid + "'>" + businesslist[i].hbtname + "</option>");
+                    }
+                }
+            }
+        });
+    });
+
+</script>
+    <div id="searchdiv" style="display: flex">
+        <div class="warehouse_btn" id="newcar_btn">开单接车</div>
+    </div>
+    <div id="carlistdiv"><table id="carlist"></table> <div id="pager1"></div></div>
+
+    <div id="accesscardiv" style="display: none">
+        <div>
+            <div class="inputbaselabel">
+                <label>车牌：</label>
+                <input type="text" name="carplate" placeholder="请输入车牌"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>车主姓名：</label>
+                <input type="text" name="carowner" placeholder="请输入车主姓名"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>车主电话：</label>
+                <input type="text" name="carownerphone" placeholder="请输入车主电话"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>当前里程：</label>
+                <input type="text" name="carmile" placeholder="请输入当前里程"/>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>车型：</label>
+                <input type="text" name="cartype" placeholder="请输入车型"/>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>业务类别：</label>
+                <select name="businesstypeselect">
+                    <option value="0">---请选择---</option>
+                </select>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>工单内容：</label>
+                <textarea style="vertical-align: top;" rows="3" cols="20" name="orderdesc" placeholder="请输入本次工单内容"></textarea>
+            </div>
+
+        </div>
+        <div id="searchsubmitdiv" style="display: flex">
+            <div class="warehouse_btn" id="newcar_submitbtn">开单接车</div>
+        </div>
+    </div>
+</body>
+</html>
