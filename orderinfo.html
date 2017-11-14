@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>工单详情</title>
+
+    <style>
+        .headinfo{
+            float: left;
+            width: 100%;
+            height: 27px;
+            line-height: 27px;
+            font-size: 12px;
+            background: #eeeeee;
+        }
+
+
+        .searchlabel{
+            width: 50px;
+            font-size: 12px;
+            color: #333333;
+            text-align: justify;
+            overflow: hidden;
+            height: 24px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: keep-all;
+            text-align-last: justify;
+            -moz-text-align-last: justify;
+            margin-left: 5px;
+        }
+
+        .searchlabeli{
+            width: 15px;
+            font-size: 12px;
+            color: #333333;
+            overflow: hidden;
+            height: 24px;
+        }
+
+        .searchinput{
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 100px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 12px;
+            display: -webkit-box;
+            display: -moz-box;
+        }
+
+        .searchinputtext{
+            height: 22px;
+            line-height: 22px;
+            text-indent: 5px;
+            border: 1px solid #bbb;
+            color: #666;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 1px;
+            display: -webkit-box;
+        }
+
+        .searchdiv{
+            width: 60%;
+            height: 24px;
+            line-height: 24px;
+            margin-top: 5px;
+            display: -webkit-box;
+            display: -moz-box;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+        }
+
+        td{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <script type="application/javascript">
+        $(function () {
+            //工单信息初始化
+            $.ajax({
+                type: "POST",
+                url: rootip + "/car/getorderinfo",
+                dataType: "json",
+                async: false,
+                data: {orderid:curorderid},
+                success: function (d) {
+                    if(d.status == 0){
+                        var orderinfo = d.obj
+                        $("#wo-header-wono").html(orderinfo.serialno);
+                        $("#wo-header-acceptor").html(orderinfo.acceptorname);
+                        $("#wo-header-enterdtm").html(orderinfo.entrydtm);
+                        $("input[name='info_carplate_input']").val(orderinfo.carplate);
+                        $("input[name='info_owner_input']").val(orderinfo.carownername);
+                        $("input[name='info_ownertel_input']").val(orderinfo.carownertel);
+                        $("input[name='info_cartype_input']").val(orderinfo.cartype);
+                        $("input[name='info_entrymile_input']").val(orderinfo.entermile);
+                        $("input[name='info_orderbusiness_input']").val(orderinfo.orderbusiness);
+                        $("input[name='info_takedtm_input']").val(orderinfo.takecardtm);
+                        $("input[name='info_orderdesc_input']").val(orderinfo.orderdesc);
+
+                        var mtlist = orderinfo.mtlist;
+                        handlemtlist(mtlist);
+
+                        if(!orderinfo.mtlist){
+
+                        } else {
+                        }
+                    }
+                }
+            });
+
+
+          $(".addmticon").click(function () {
+              var mttype = $("input[name='mttype']").val();
+              var mtname = $("input[name='mtname']").val();
+              var mtbrand = $("input[name='mtbrand']").val();
+              var mtamount = $("input[name='mtamount']").val();
+              var mtprice = $("input[name='mtprice']").val();
+              var mttotalprice = $("input[name='mttotalprice']").val();
+              var mtinfo = {}
+              mtinfo.hwmhmid = 1;
+              mtinfo.mtamount = mtamount;
+              mtinfo.mtprice = mtprice;
+              mtinfo.hwmtotalprice = mttotalprice;
+              mtinfo.hwmhwid = curorderid;
+
+              $.ajax({
+                  type: "POST",
+                  url: rootip + "/car/saveordermt",
+                  dataType: "json",
+                  async: false,
+                  data: {data: JSON.stringify(mtinfo)},
+                  success: function (d) {
+                      if(d.status == 0){
+                          var mtlist = d.list;
+                          handlemtlist(mtlist);
+                      }
+                  }
+              });
+          });
+
+          $("#mttable").on('click','.delmticon', function () {
+              var tr = $(this).parents("tr");
+              var td = tr.find("td").eq(0).text();
+              $.ajax({
+                  type: "POST",
+                  url: rootip + "/car/delordermt",
+                  dataType: "json",
+                  async: false,
+                  data: {hwmid : td},
+                  success: function (d) {
+                      if(d.status == 0){
+                          tr.remove();
+                      }
+                  }
+              });
+          });
+
+          function handlemtlist(mtlist) {
+              $(".mtbody").remove();
+              var mttable = $("#mttable");
+              if(mtlist!='' && mtlist != null && mtlist.length>0){
+                  for(var i = 0; i < mtlist.length; i ++){
+                      mttable.append("<tr class='mtbody'><td style='visibility: hidden;'>" + mtlist[i].hwmid + "</td><td>" + mtlist[i].mttype + "</td><td>" + mtlist[i].mtname + "</td><td>" + mtlist[i].mtbrandname + "</td><td>" + mtlist[i].mtamount + mtlist[i].mtunit + "</td><td>" + mtlist[i].mtprice + "</td><td>" + mtlist[i].hwmtotalprice + "</td><td class='delmticon'><img src='images/img/met_b_del.png'></td></tr>");
+                  }
+              }
+              mttable.append("<tr class='mtbody'><td></td><td><input type='text' name='mttype' placeholder='添加材料请输入'/></td><td><input type='text' name='mtname' placeholder=''/></td><td><input type='text' name='mtbrand' placeholder=''/></td><td><input type='text' name='mtamount' placeholder=''/></td><td><input type='text' name='mtprice' placeholder=''/></td><td><input type='text' name='mttotalprice' placeholder=''/></td><td class='addmticon'><img src='images/img/add_icon.png'></td></tr>");
+          }
+        })
+        //cursor:pointer;
+    </script>
+
+    <div class="headinfo">
+        <div style="margin-left:10px;display: inline-block;">客户及车辆信息</div>
+        <div style="margin-left:15px;outline:none;position:relative;width:150px;display: inline-block;" id="showOnlineCarOrderBtn1" tabindex="12">
+            工单号：<span id="wo-header-wono"></span>
+        </div>
+        <div style="margin-left:15px;outline:none;position:relative;width:150px;display: inline-block;" id="showOnlineCarOrderBtn2" tabindex="12">
+            接待人员：<span id="wo-header-acceptor"></span>
+        </div>
+        <div style="margin-left:15px;outline:none;position:relative;width:200px;display: inline-block;" id="showOnlineCarOrderBtn3" tabindex="12">
+            进厂时间：<span id="wo-header-enterdtm">20171107 15：00：00</span>
+        </div>
+    </div>
+    <div>
+        <div class="searchdiv">
+            <div class="searchlabel">车牌</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_carplate_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">车主姓名</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_owner_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">车主电话</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_ownertel_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">进厂时间</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_entry_input" class="searchinputtext" type="text"></div>
+        </div>
+
+        <div class="searchdiv">
+            <div class="searchlabel">车型</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_cartype_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">进厂里程</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_entrymile_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">工单业务</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_orderbusiness_input" class="searchinputtext" type="text"></div>
+
+            <div class="searchlabel">交车时间</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_takedtm_input" class="searchinputtext" type="text"></div>
+        </div>
+
+        <div class="searchdiv">
+            <div class="searchlabel">整单备注</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_orderdesc_input" class="searchinputtext" type="text"></div>
+        </div>
+    </div>
+
+    <div class="headinfo" style="margin-top:10px;">
+        <div style="margin-left:10px;display: inline-block;">工单材料信息</div>
+    </div>
+    <div id="materiallist">
+        <table id = "mttable" style="width: 700px">
+            <tr class = "mthead">
+                <th width="1px;"></th>
+                <th>材料类型</th>
+                <th>材料名称</th>
+                <th>品牌</th>
+                <th>数量</th>
+                <th>单价</th>
+                <th>总价</th>
+                <th>操作</th>
+            </tr>
+<!--            <tr class="mtbody">
+                <td>hwmid</td>
+                <td>机油</td>
+                <td>金美孚</td>
+                <td>美孚</td>
+                <td>4L</td>
+                <td>￥50</td>
+                <td>￥200</td>
+                <td class="delmticon"><img src="images/img/met_b_del.png"></td>
+            </tr>
+            <tr class="mtbody">
+                <td></td>
+                <td><input type="text" name="mttype" placeholder="添加材料请输入"/></td>
+                <td><input type="text" name="mtname" placeholder=""/></td>
+                <td><input type="text" name="mtbrand" placeholder=""/></td>
+                <td><input type="text" name="mtamount" placeholder=""/></td>
+                <td><input type="text" name="mtprice" placeholder=""/></td>
+                <td><input type="text" name="mttotalprice" placeholder=""/></td>
+                <td class="addmticon"><img src="images/img/add_icon.png"></td>
+            </tr>-->
+        </table>
+    </div>
+</body>
+</html>
