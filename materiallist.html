@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>材料列表</title>
+    <style>
+        #materiallistdiv{
+            width: 900px;
+            display: block;
+        }
+        .inputbaselabel{
+            font-size: 15px;
+            font-family: '微软雅黑';
+            color:#626262;
+        }
+
+        .inputbaselabel label{
+            text-align: justify;
+            text-justify:inter-ideograph;
+            display:inline-block;
+            width: 100px;
+            font-size: 15px;
+        }
+
+        .searchlabel{
+            width: 80px;
+            font-size: 12px;
+            color: #333333;
+            text-align: justify;
+            overflow: hidden;
+            height: 24px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: keep-all;
+            text-align-last: justify;
+            -moz-text-align-last: justify;
+            margin-left: 5px;
+        }
+
+        .searchlabeli{
+            width: 15px;
+            font-size: 12px;
+            color: #333333;
+            overflow: hidden;
+            height: 24px;
+        }
+
+        .searchinput{
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 100px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 12px;
+            display: -webkit-box;
+            display: -moz-box;
+        }
+
+        .searchinputtext{
+            height: 22px;
+            line-height: 22px;
+            text-indent: 5px;
+            border: 1px solid #bbb;
+            color: #666;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 1px;
+            display: -webkit-box;
+        }
+
+        .searchdiv{
+            width: 25%;
+            height: 24px;
+            line-height: 24px;
+            margin-top: 5px;
+            display: -webkit-box;
+            display: -moz-box;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+    $(function() {
+        $("#materiallist").jqGrid({
+            url : rootip + "/material/list",
+            datatype : "json",
+            mtype:'POST',
+            height:'auto',
+            jsonReader: {
+                root: "rows",
+                total: "totalpages",
+                page: "currpage",
+                records: "totalrecords",
+                repeatitems: false
+            },
+            colNames:['key','材料类型','材料名称','材料品牌','材料库存','材料进价','材料销价','操作'],
+            colModel:[
+                { name: 'hmid', index: 'hmid',key:true,hidden:true,search:false},
+                { name: 'materialcategory', index: 'materialcategory',hidden:false,search:false,width:150, align:'center'},
+                { name: 'hmname', index: 'hmname',width:100,sortable:true,search:false,editable:false, align:'center'},
+                { name: 'brandname', index: 'brandname',width:100,sortable:true,search:false,editable:false, align:'center'},
+                { name: 'hmstock', index: 'hmstock',width:100,hidden:false,search:false, align:'center'},
+                { name: 'hmprice', index: 'hmprice',width:100,hidden:false,search:false, align:'center'},
+                { name: 'hmsaleprice', index: 'hmsaleprice',hidden:false,search:false, align:'center'},
+                { name: 'opt' , index: 'opt',search:false, sortable:false, width:80,formatter:function(v,data,row){
+                    var str = '<input type="button" onclick="editMateril('+row.hmid+')" value="修改" />';
+                    str += ' <input type="button" onclick="addStock('+row.hmid+')" value="进货" /> ';
+                    return str;
+                }}
+            ],
+            rowNum : 10,
+            rowList : [10, 20, 40],
+            pager : '#pager1',
+            viewrecords : true,
+            caption : "材料列表",
+            toolbar: [true,"top"],
+            rownumbers: true,
+            rownumWidth: 40,
+            sortable:true,
+            sortorder:'desc'
+        });
+        
+        $("#newmaterial_btn").click(function () {
+            editMateril(0);
+        });
+        $("#material_submitbtn").click(function () {
+            var data = {};
+            data.hmname = $("input[name='hmname']").val();
+            data.brandname = $("input[name='hmbrandname']").val();
+            data.hmhmcid = $("select[name='materialcategoryselect']").val();
+            data.hmunit = $("input[name='hmunit']").val();
+            data.hmsaleprice = $("input[name='saleprice']").val();
+            data.hmid = $("input[name='hmid']").val();
+
+
+            console.log(data);
+
+            $.ajax({
+                type: "POST",
+                url: rootip + "/material/savematerialitem",
+                dataType: "json",
+                async: false,
+                data: {data: JSON.stringify(data)},
+                success: function (d) {
+                    if(d.status!=0){
+                        alert(d.msg);
+                    } else {
+                        layer.closeAll();
+
+                        $("select[name='materialcategoryselect']").val(0)
+                        $("input[name='hmname']").val("");
+                        $("input[name='hmbrandname']").val("");
+                        $("input[name='hmunit']").val("");
+                        $("input[name='saleprice']").val("");
+                        $("input[name='hmid']").val("");
+
+
+                        $("#materiallist").trigger("reloadGrid");
+                    }
+                }
+            });
+        });
+
+
+        //设置材料类别下拉菜单
+        $.ajax({
+            type: "POST",
+            url: rootip + "/material/getcategorylist",
+            dataType: "json",
+            async: false,
+            data: {},
+            success: function (d) {
+                if(d.status==0){
+                    var categorylist = d.list;
+                    for(var i=0; i<categorylist.length; i++){
+                        $("select[name='materialcategoryselect']").append("<option value='" + categorylist[i].hmcid + "'>" + categorylist[i].hmcname + "</option>");
+                    }
+                }
+            }
+        });
+
+        $("#stock_submitbtn").click(function () {
+            var data = {};
+            data.hmid = $("input[name='addstockhmid']").val();
+            data.amount = $("input[name='addamount']").val();
+            data.price = $("input[name='price']").val();
+
+            console.log(data);
+
+            $.ajax({
+                type: "POST",
+                url: rootip + "/material/addmaterialstock",
+                dataType: "json",
+                async: false,
+                data: {data: JSON.stringify(data)},
+                success: function (d) {
+                    if(d.status!=0){
+                        alert(d.msg);
+                    } else {
+                        layer.closeAll();
+
+                        $("input[name='addstockhmid']").val(0);
+                        $("input[name='addamount']").val('');
+                        $("input[name='price']").val('');
+
+                        $("#materiallist").trigger("reloadGrid");
+                    }
+                }
+            });
+        });
+    });
+
+
+    function addStock(hmid) {
+        layer.open({
+            type :1,
+            title : '进货增加库存',
+            maxmin : false,
+            shadeClose : false,
+            area : ['400px', '520px'],
+            content : $('#addstockdiv')
+        });
+        $("input[name='addstockhmid']").val(hmid)
+    }
+
+    function editMateril(hmid) {
+        layer.open({
+            type :1,
+            title : '编辑材料',
+            maxmin : false,
+            shadeClose : false,
+            area : ['400px', '520px'],
+            content : $('#editmaterialdiv')
+        });
+
+        if(hmid > 0){
+            $.ajax({
+                type: "POST",
+                url: rootip + "/material/getmaterialinfo",
+                dataType: "json",
+                async: false,
+                data: {"hmid":hmid},
+                success: function (d) {
+                    if(d.status==0){
+                        var info = d.obj
+                        $("select[name='materialcategoryselect']").val(info.hmhmcid)
+                        $("input[name='hmname']").val(info.hmname);
+                        $("input[name='hmbrandname']").val(info.brandname);
+                        $("input[name='hmunit']").val(info.hmunit);
+                        $("input[name='saleprice']").val(info.hmsaleprice);
+                        $("input[name='hmid']").val(info.hmid);
+                    }
+                }
+            });
+        }
+    }
+
+
+</script>
+    <div id="searchdiv" style="display: flex; margin-top: 2px;">
+        <div class="warehouse_btn" id="newmaterial_btn">新建材料</div>
+        <div class="searchdiv">
+            <div class="searchlabel">材料类型</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_carplate_input" class="searchinputtext" type="text"></div>
+        </div>
+
+        <div class="searchdiv">
+            <div class="searchlabel">材料名称</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_hmname_input" class="searchinputtext" type="text"></div>
+        </div>
+    </div>
+
+    <div id="materiallistdiv"><table id="materiallist"></table> <div id="pager1"></div></div>
+
+    <div id="editmaterialdiv" style="display: none">
+        <div>
+            <div class="inputbaselabel">
+                <label>材料类型：</label>
+                <select name="materialcategoryselect">
+                    <option value="0">---请选择---</option>
+                </select>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>材料名称：</label>
+                <input type="text" name="hmname" placeholder="请输入材料名称"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>材料品牌：</label>
+                <input type="text" name="hmbrandname" placeholder="请输入材料品牌"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>材料单位：</label>
+                <input type="text" name="hmunit" placeholder="请输入材料单位"/>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>材料销价：</label>
+                <input type="text" name="saleprice" placeholder="请输入材料销价"/>
+            </div>
+
+
+            <div class="inputbaselabel" style="visibility: hidden">
+                <input type="text" name="hmid"/>
+            </div>
+
+        </div>
+        <div id="searchsubmitdiv" style="display: flex">
+            <div class="warehouse_btn" id="material_submitbtn">保存</div>
+        </div>
+    </div>
+
+    <div id="addstockdiv" style="display: none">
+        <div>
+            <div class="inputbaselabel">
+                <label>增加库存数量：</label>
+                <input type="text" name="addamount" placeholder="请输入进货数量"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>材料单价：</label>
+                <input type="text" name="price" placeholder="请输入进货单价"/>
+            </div>
+
+            <div class="inputbaselabel" style="visibility: hidden">
+                <input type="text" name="addstockhmid"/>
+            </div>
+
+        </div>
+        <div id="stocksubmitdiv" style="display: flex">
+            <div class="warehouse_btn" id="stock_submitbtn">保存</div>
+        </div>
+    </div>
+</body>
+</html>

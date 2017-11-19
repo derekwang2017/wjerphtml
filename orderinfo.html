@@ -75,6 +75,14 @@
         td{
             text-align: center;
         }
+
+        #materiallistdiv{
+            margin-left: 5px;
+        }
+
+        .mttableinput{
+            width: 30px;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +104,7 @@
                         $("input[name='info_carplate_input']").val(orderinfo.carplate);
                         $("input[name='info_owner_input']").val(orderinfo.carownername);
                         $("input[name='info_ownertel_input']").val(orderinfo.carownertel);
+                        $("input[name='info_entry_input']").val(orderinfo.entrydtm);
                         $("input[name='info_cartype_input']").val(orderinfo.cartype);
                         $("input[name='info_entrymile_input']").val(orderinfo.entermile);
                         $("input[name='info_orderbusiness_input']").val(orderinfo.orderbusiness);
@@ -121,7 +130,7 @@
               var mtamount = $("input[name='mtamount']").val();
               var mtprice = $("input[name='mtprice']").val();
               var mttotalprice = $("input[name='mttotalprice']").val();
-              var mtinfo = {}
+              var mtinfo = {};
               mtinfo.hwmhmid = 1;
               mtinfo.mtamount = mtamount;
               mtinfo.mtprice = mtprice;
@@ -160,17 +169,129 @@
               });
           });
 
+            $("#mttable").on('click','#newmaterialselect', function () {
+                layer.open({
+                    type :1,
+                    title : '工单选择材料',
+                    maxmin : false,
+                    shadeClose : false,
+                    area : ['810px', '400px'],
+                    content : $('#selectmaterialdiv')
+                });
+            });
+
+            $("#mttable").on('change','.mttableinput',function () {
+                var tr = $(this).parents("tr");
+                var hwmid = tr.find("td").eq(0).text();
+                var amount = tr.find("input[name='mtamount']").eq(0).val();
+                var price = tr.find("input[name='mtprice']").eq(0).val();
+                tr.find("td").eq(6).text(amount * price);
+
+                var mtinfo = {};
+                mtinfo.hwmid = hwmid;
+                mtinfo.mtamount = amount;
+                mtinfo.mtprice = price;
+                mtinfo.hwmhwid = curorderid;
+
+                $.ajax({
+                    type: "POST",
+                    url: rootip + "/car/saveordermt",
+                    dataType: "json",
+                    async: false,
+                    data: {data: JSON.stringify(mtinfo)},
+                    success: function (d) {
+                        if(d.status == 0){
+                            var mtlist = d.list;
+                            handlemtlist(mtlist);
+                        }
+                    }
+                });
+
+            });
+
           function handlemtlist(mtlist) {
               $(".mtbody").remove();
               var mttable = $("#mttable");
               if(mtlist!='' && mtlist != null && mtlist.length>0){
                   for(var i = 0; i < mtlist.length; i ++){
-                      mttable.append("<tr class='mtbody'><td style='visibility: hidden;'>" + mtlist[i].hwmid + "</td><td>" + mtlist[i].mttype + "</td><td>" + mtlist[i].mtname + "</td><td>" + mtlist[i].mtbrandname + "</td><td>" + mtlist[i].mtamount + mtlist[i].mtunit + "</td><td>" + mtlist[i].mtprice + "</td><td>" + mtlist[i].hwmtotalprice + "</td><td class='delmticon'><img src='images/img/met_b_del.png'></td></tr>");
+                      mttable.append("<tr class='mtbody'><td style='visibility: hidden;'>" + mtlist[i].hwmid + "</td><td>" + mtlist[i].mttype + "</td><td>" + mtlist[i].mtname + "</td><td>" + mtlist[i].mtbrandname + "</td><td><input type='text' class='mttableinput' name='mtamount' value='" + mtlist[i].mtamount +"'/>" + mtlist[i].mtunit + "</td><td><input type='text' class='mttableinput' name='mtprice' value='" + mtlist[i].mtprice + "'/>" + "</td><td>" + mtlist[i].hwmtotalprice + "</td><td class='delmticon'><img src='images/img/met_b_del.png'></td></tr>");
                   }
               }
-              mttable.append("<tr class='mtbody'><td></td><td><input type='text' name='mttype' placeholder='添加材料请输入'/></td><td><input type='text' name='mtname' placeholder=''/></td><td><input type='text' name='mtbrand' placeholder=''/></td><td><input type='text' name='mtamount' placeholder=''/></td><td><input type='text' name='mtprice' placeholder=''/></td><td><input type='text' name='mttotalprice' placeholder=''/></td><td class='addmticon'><img src='images/img/add_icon.png'></td></tr>");
+              mttable.append("<tr class='mtbody' id='newmaterialselect'><td></td><td><input type='text' name='mttype' placeholder='添加材料请点击'/></td><td><input type='text' name='mtname' placeholder=''/></td><td><input type='text' name='mtbrand' placeholder=''/></td><td><input type='text' name='mtamount' placeholder=''/></td><td><input type='text' name='mtprice' placeholder=''/></td><td><input type='text' name='mttotalprice' placeholder=''/></td><td></td></tr>");
           }
-        })
+
+            $("#orderselectmateriallist").jqGrid({
+                url : rootip + "/material/list",
+                datatype : "json",
+                mtype:'POST',
+                height:'auto',
+                jsonReader: {
+                    root: "rows",
+                    total: "totalpages",
+                    page: "currpage",
+                    records: "totalrecords",
+                    repeatitems: false
+                },
+                colNames:['key','材料类型','材料名称','材料品牌','材料库存','材料进价','材料销价'],
+                colModel:[
+                    { name: 'hmid', index: 'hmid',key:true,hidden:true,search:false},
+                    { name: 'materialcategory', index: 'materialcategory',hidden:false,search:false,width:150, align:'center'},
+                    { name: 'hmname', index: 'hmname',width:100,sortable:true,search:false,editable:false, align:'center'},
+                    { name: 'brandname', index: 'brandname',width:100,sortable:true,search:false,editable:false, align:'center'},
+                    { name: 'hmstock', index: 'hmstock',width:100,hidden:false,search:false, align:'center'},
+                    { name: 'hmprice', index: 'hmprice',width:100,hidden:false,search:false, align:'center'},
+                    { name: 'hmsaleprice', index: 'hmsaleprice',hidden:false,search:false, align:'center'}
+                ],
+                rowNum : 10,
+                rowList : [10, 20, 40],
+                pager : '#pager2',
+                viewrecords : true,
+                caption : "材料列表",
+                toolbar: [true,"top"],
+                rownumbers: true,
+                rownumWidth: 40,
+                sortable:true,
+                sortorder:'desc',
+                multiselect: true
+            });
+
+
+            //选择材料加入工单
+            $("#select_submitbtn").click(function () {
+                var ids = $("#orderselectmateriallist").jqGrid("getGridParam", "selarrrow");
+                if(ids.length==0){
+                    alert("请先选择材料！");
+                    return;
+                }
+                var selectHmids = "";
+                $(ids).each(function (index, id){
+                    var row = $("#orderselectmateriallist").jqGrid('getRowData', id);
+                    selectHmids += "," + row.hmid;
+                });
+                if(selectHmids!=''){
+                    selectHmids = selectHmids.substring(1);
+
+                    var data = {}
+                    data.orderid = curorderid;
+                    data.materialids = selectHmids;
+                    $.ajax({
+                        type: "POST",
+                        url: rootip + "/car/addordermt",
+                        dataType: "json",
+                        async: false,
+                        data: {data: JSON.stringify(data)},
+                        success: function (d) {
+                            if(d.status==0){
+                                var mtlist = d.list;
+                                handlemtlist(mtlist);
+                                layer.closeAll();
+                            }
+                        }
+                    });
+                }
+            })
+        });
+;
         //cursor:pointer;
     </script>
 
@@ -266,6 +387,14 @@
                 <td class="addmticon"><img src="images/img/add_icon.png"></td>
             </tr>-->
         </table>
+    </div>
+
+
+    <div id="selectmaterialdiv" style="display: none">
+        <div id="materiallistdiv"><table id="orderselectmateriallist"></table> <div id="pager2"></div></div>
+        <div id="stocksubmitdiv" style="display: flex">
+            <div class="warehouse_btn" id="select_submitbtn">选择并添加</div>
+        </div>
     </div>
 </body>
 </html>
