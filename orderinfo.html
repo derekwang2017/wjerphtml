@@ -83,45 +83,51 @@
         .mttableinput{
             width: 30px;
         }
+
+        .bottomdiv{
+            width: 100%;
+            height: 60px;
+            position: fixed;
+            bottom: 0;
+        }
+
+        .bottomtext{
+            float: left;
+            margin-left: 10px;
+            font-size: 20px;
+        }
+        .bottombtndiv{
+            float: right;
+            margin-right: 200px;
+        }
+
+        .workhourpricetext{
+            margin-left: 30px;
+            margin-top: 40px;
+            float: left;
+        }
+
+        .workhourpriceinput{
+            width: 50px;
+            text-align: right;
+        }
+
+        .paymentpricetext{
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .statusbgimg{
+            margin-top: 20px;
+            margin-left: 310px;
+        }
     </style>
 </head>
 <body>
     <script type="application/javascript">
         $(function () {
             //工单信息初始化
-            $.ajax({
-                type: "POST",
-                url: rootip + "/car/getorderinfo",
-                dataType: "json",
-                async: false,
-                data: {orderid:curorderid},
-                success: function (d) {
-                    if(d.status == 0){
-                        var orderinfo = d.obj
-                        $("#wo-header-wono").html(orderinfo.serialno);
-                        $("#wo-header-acceptor").html(orderinfo.acceptorname);
-                        $("#wo-header-enterdtm").html(orderinfo.entrydtm);
-                        $("input[name='info_carplate_input']").val(orderinfo.carplate);
-                        $("input[name='info_owner_input']").val(orderinfo.carownername);
-                        $("input[name='info_ownertel_input']").val(orderinfo.carownertel);
-                        $("input[name='info_entry_input']").val(orderinfo.entrydtm);
-                        $("input[name='info_cartype_input']").val(orderinfo.cartype);
-                        $("input[name='info_entrymile_input']").val(orderinfo.entermile);
-                        $("input[name='info_orderbusiness_input']").val(orderinfo.orderbusiness);
-                        $("input[name='info_takedtm_input']").val(orderinfo.takecardtm);
-                        $("input[name='info_orderdesc_input']").val(orderinfo.orderdesc);
-
-                        var mtlist = orderinfo.mtlist;
-                        handlemtlist(mtlist);
-
-                        if(!orderinfo.mtlist){
-
-                        } else {
-                        }
-                    }
-                }
-            });
-
+            refreshOrderinfo();
 
           $(".addmticon").click(function () {
               var mttype = $("input[name='mttype']").val();
@@ -209,7 +215,83 @@
 
             });
 
-          function handlemtlist(mtlist) {
+            $("#settlementbtn").click(function () {
+                layer.open({
+                    type :1,
+                    title : '确认结算',
+                    maxmin : false,
+                    shadeClose : false,
+                    area : ['350px', '150px'],
+                    content : $('.workhourpricediv'),
+                    end : function () {
+                        opendetail(curorderid);
+//                        refreshOrderinfo();
+                    }
+                });
+            });
+
+            $("#paymentbtn").click(function () {
+                layer.open({
+                    type :1,
+                    title : '确认收银',
+                    maxmin : false,
+                    shadeClose : false,
+                    area : ['350px', '150px'],
+                    content : $('.realpricediv'),
+                    end : function () {
+                        opendetail(curorderid);
+
+//                        refreshOrderinfo();
+                    }
+                });
+            });
+
+            $("#confirmsettlementbtn").click(function () {
+                var workhourprice = $("input[name='workhourpriceinput']").val();
+                var data = {}
+                data.orderid = curorderid;
+                data.workhourprice = workhourprice;
+                $.ajax({
+                    type: "POST",
+                    url: rootip + "/car/settlement",
+                    dataType: "json",
+                    async: false,
+                    data: {data: JSON.stringify(data)},
+                    success: function (d) {
+                        if(d.status == 0){
+                            alert("结算成功");
+                            layer.closeAll();
+                        } else if(d.status == 1){
+                            alert(d.msg);
+                        }
+                    }
+                });
+            });
+
+            $("#confirmpaymentbtn").click(function () {
+                var realprice = $("input[name='realpriceinput']").val();
+                var data = {}
+                data.orderid = curorderid;
+                data.realpayamount = realprice;
+                $.ajax({
+                    type: "POST",
+                    url: rootip + "/car/payment",
+                    dataType: "json",
+                    async: false,
+                    data: {data: JSON.stringify(data)},
+                    success: function (d) {
+                        if(d.status == 0){
+                            alert("收银成功");
+                            layer.closeAll();
+                        } else if(d.status == 1){
+                            alert(d.msg);
+                        }
+                    }
+                });
+            });
+
+
+            function handlemtlist(mtlist) {
               $(".mtbody").remove();
               var mttable = $("#mttable");
               if(mtlist!='' && mtlist != null && mtlist.length>0){
@@ -290,6 +372,93 @@
                     });
                 }
             })
+
+            function refreshOrderinfo() {
+                $.ajax({
+                    type: "POST",
+                    url: rootip + "/car/getorderinfo",
+                    dataType: "json",
+                    async: false,
+                    data: {orderid:curorderid},
+                    success: function (d) {
+                        if(d.status == 0){
+                            var orderinfo = d.obj
+                            $("#wo-header-wono").html(orderinfo.serialno);
+                            $("#wo-header-acceptor").html(orderinfo.acceptorname);
+                            $("#wo-header-enterdtm").html(orderinfo.entrydtm);
+                            $("input[name='info_carplate_input']").val(orderinfo.carplate);
+                            $("input[name='info_owner_input']").val(orderinfo.carownername);
+                            $("input[name='info_ownertel_input']").val(orderinfo.carownertel);
+                            $("input[name='info_entry_input']").val(orderinfo.entrydtm);
+                            $("input[name='info_cartype_input']").val(orderinfo.cartype);
+                            $("input[name='info_entrymile_input']").val(orderinfo.entermile);
+                            $("input[name='info_orderbusiness_input']").val(orderinfo.orderbusiness);
+                            $("input[name='info_takedtm_input']").val(orderinfo.takecardtm);
+                            $("input[name='info_orderdesc_input']").val(orderinfo.orderdesc);
+
+                            var mtlist = orderinfo.mtlist;
+                            handlemtlist(mtlist);
+
+                            var hwworkhourprice = orderinfo.hwworkhourprice;  //总工时费
+                            var totalmaterialprice = orderinfo.totalmaterialprice;  //总材料费
+                            $(".bottomtext").text("工单金额明细：材料费总额（" + totalmaterialprice + "元），工时费总额（" + hwworkhourprice + "元）");
+
+                            //设置操作按钮
+                            var orderstatus = orderinfo.hwstatus;   //0进行中，1已完工，2已结算，3已收银，4已交车，9取消
+                            var settlementbtn = $("#settlementbtn");
+                            var paymentbtn = $("#paymentbtn");
+                            var takecarbtn = $("#takecarbtn");
+                            if(orderstatus==0 || orderstatus==1){  //可结算
+                                settlementbtn.css("display","");
+                            } else if(orderstatus==2){  //可收银
+                                $("#jiesuanimg").css("display","");
+                                paymentbtn.css("display","");
+                            } else if(orderstatus==3){
+                                $("#shouyinimg").css("display","");
+                                takecarbtn.css("display","");
+                                takecarbtn.click(function () {
+                                    if(confirm('是否确认交车？')){
+                                        $.ajax({
+                                            type: "POST",
+                                            url: rootip + "/car/takecar",
+                                            dataType: "json",
+                                            async: false,
+                                            data: {orderid : curorderid},
+                                            success: function (d) {
+                                                if(d.status == 0){
+                                                    alert("交车成功");
+                                                    rtnOrderlist();
+                                                } else if(d.status == 1){
+                                                    alert(d.msg);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            var needpayamount = hwworkhourprice + totalmaterialprice;
+                            $("#needpayamount").text("应付金额：" + needpayamount + "元");
+                        }
+                    }
+                });
+
+
+            }
+
+            function rtnOrderlist() {
+                $.ajax({
+                    url:onlinecarlisturl,
+                    type:"GET",
+                    success:function(data){
+                        $("#mainbody").html(data);
+                    },
+                    error:function(XmlHttpRequest, textStatus, errorThrown){
+                        alert("error:");
+                        $("#mainbody").html("error");
+                    }
+                });
+            }
         });
 ;
         //cursor:pointer;
@@ -396,5 +565,32 @@
             <div class="warehouse_btn" id="select_submitbtn">选择并添加</div>
         </div>
     </div>
+
+    <div class="bottomdiv">
+        <div><hr style="border:1px dashed #000; height:1px"></div>
+        <div class="bottomtext">工单金额明细：材料费总额（0元），工时费总额（0元）</div>
+        <div class="bottombtndiv">
+            <div class="warehouse_btn" id="settlementbtn" style="display: none">结算</div>
+            <div class="warehouse_btn" id="paymentbtn" style="display: none">收银</div>
+            <div class="warehouse_btn" id="takecarbtn" style="display: none">交车</div>
+        </div>
+    </div>
+
+    <div class="workhourpricediv" style="display:none">
+        <div class="workhourpricetext">请输入工时费：
+            <input type="text" name="workhourpriceinput" value = "" class="workhourpriceinput"/>元
+        </div>
+        <div class="warehouse_btn" id="confirmsettlementbtn" style="margin-top: 35px;margin-left: 20px;">确认结算</div>
+    </div>
+    <div class="realpricediv" style="display:none">
+        <div id="needpayamount" class="paymentpricetext">工单应付金额：0元</div>
+        <div class="paymentpricetext">实付金额：
+            <input type="text" name="realpriceinput" value = "" class="workhourpriceinput"/>元
+        </div>
+        <div class="warehouse_btn" id="confirmpaymentbtn" style="margin-top: 10px;margin-left: 20px;">确认收银</div>
+    </div>
+
+    <img id="jiesuanimg" src="images/img/yijiesuan.png" class="statusbgimg" style="display: none">
+    <img id="shouyinimg" src="images/img/yishouyin.png" class="statusbgimg" style="display: none">
 </body>
 </html>

@@ -111,8 +111,8 @@
                     return str;
                 }}
             ],
-            rowNum : 10,
-            rowList : [10, 20, 40],
+            rowNum : 20,
+            rowList : [20, 40, 60],
             pager : '#pager1',
             viewrecords : true,
             caption : "材料列表",
@@ -150,15 +150,7 @@
                     } else {
                         layer.closeAll();
 
-                        $("select[name='materialcategoryselect']").val(0)
-                        $("input[name='hmname']").val("");
-                        $("input[name='hmbrandname']").val("");
-                        $("input[name='hmunit']").val("");
-                        $("input[name='saleprice']").val("");
-                        $("input[name='hmid']").val("");
-
-
-                        $("#materiallist").trigger("reloadGrid");
+                        //reloadMaterialDiv();
                     }
                 }
             });
@@ -221,7 +213,10 @@
             maxmin : false,
             shadeClose : false,
             area : ['400px', '520px'],
-            content : $('#addstockdiv')
+            content : $('#addstockdiv'),
+            end: function () {
+                reloadStocklDiv();
+            }
         });
         $("input[name='addstockhmid']").val(hmid)
     }
@@ -233,7 +228,10 @@
             maxmin : false,
             shadeClose : false,
             area : ['400px', '520px'],
-            content : $('#editmaterialdiv')
+            content : $('#editmaterialdiv'),
+            end: function () {
+                reloadMaterialDiv();
+            }
         });
 
         if(hmid > 0){
@@ -256,6 +254,24 @@
                 }
             });
         }
+    }
+
+    function reloadMaterialDiv(){
+        $("select[name='materialcategoryselect']").val(0)
+        $("input[name='hmname']").val("");
+        $("input[name='hmbrandname']").val("");
+        $("input[name='hmunit']").val("");
+        $("input[name='saleprice']").val("");
+        $("input[name='hmid']").val("");
+        $("#materiallist").trigger("reloadGrid");
+    }
+
+    function reloadStocklDiv() {
+        $("input[name='addstockhmid']").val(0);
+        $("input[name='addamount']").val('');
+        $("input[name='price']").val('');
+
+        $("#materiallist").trigger("reloadGrid");
     }
 
 

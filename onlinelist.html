@@ -129,7 +129,10 @@
                 maxmin : false,
                 shadeClose : false,
                 area : ['400px', '520px'],
-                content : $('#accesscardiv')
+                content : $('#accesscardiv'),
+                open : function () {
+                    reloadCarinfoDiv();
+                }
             });
         });
         $("#newcar_submitbtn").click(function () {
@@ -210,6 +213,16 @@
                 $("#mainbody").html("error");
             }
         });
+    }
+
+    function reloadCarinfoDiv() {
+        $("input[name='carplate']").val("");
+        $("select[name='businesstypeselect']").val(0);
+        $("textarea[name='orderdesc']").val("");
+        $("input[name='carowner']").val("");
+        $("input[name='carownerphone']").val("");
+        $("input[name='carmile']").val("");
+        $("input[name='cartype']").val("");
     }
 
 </script>
