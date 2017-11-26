@@ -65,9 +65,10 @@
     <script type="text/javascript" src="js/jquery.jqGrid.js"></script>
     <script type="text/javascript" src="js/grid.locale-cn.js"></script>
     <script type="text/javascript" src="js/layui.js"></script>
+    <script type="text/javascript" src="js/publicmethod.js"></script>
     <script type="text/javascript">
-        var rootip = "http://139.224.236.146:8888";
-//        var rootip = "http://localhost:8888";
+//        var rootip = "http://139.224.236.146:8888";
+        var rootip = "http://localhost:8888";
         var orderdetailurl = "orderinfo.html";
         var onlinecarlisturl = "onlinelist.html";
         var curorderid = 0;
@@ -99,8 +100,8 @@
                 });
                 $(".first_dd").css("background-color","");
                 $(this).css("background-color","blue");
-            })
-            
+            });
+
 
         })
     </script>
@@ -111,7 +112,7 @@
                     <dt>车辆管理<img src="images/left/select_xl01.png"></dt>
                     <dd class="first_dd" datahref="onlinelist.html">在场车辆</dd>
                     <dd class="first_dd" datahref="carlist.html">车辆查询</dd>
-                    <dd class="first_dd" datahref="rightmain.html">工单查询</dd>
+                    <dd class="first_dd" datahref="historyorder.html">历史工单</dd>
                 </dl>
 
                 <dl class="custom">

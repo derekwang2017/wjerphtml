@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>服务记录</title>
+    <style>
+        #carlistdiv{
+            width: 900px;
+            display: block;
+        }
+        .inputbaselabel{
+            font-size: 15px;
+            font-family: '微软雅黑';
+            color:#626262;
+        }
+
+        .inputbaselabel label{
+            text-align: justify;
+            text-justify:inter-ideograph;
+            display:inline-block;
+            width: 100px;
+            font-size: 15px;
+        }
+
+        .searchlabel{
+            width: 80px;
+            font-size: 12px;
+            color: #333333;
+            text-align: justify;
+            overflow: hidden;
+            height: 24px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: keep-all;
+            text-align-last: justify;
+            -moz-text-align-last: justify;
+            margin-left: 5px;
+        }
+
+        .searchlabeli{
+            width: 15px;
+            font-size: 12px;
+            color: #333333;
+            overflow: hidden;
+            height: 24px;
+        }
+
+        .searchinput{
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 100px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 12px;
+            display: -webkit-box;
+            display: -moz-box;
+        }
+
+        .searchinputtext{
+            height: 22px;
+            line-height: 22px;
+            text-indent: 5px;
+            border: 1px solid #bbb;
+            color: #666;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+            width: 1px;
+            display: -webkit-box;
+        }
+
+        .searchdiv{
+            width: 25%;
+            height: 24px;
+            line-height: 24px;
+            margin-top: 5px;
+            display: -webkit-box;
+            display: -moz-box;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+    $(function() {
+        $("#carlist").jqGrid({
+            url: rootip + "/car/historyorderlist",
+            datatype: "json",
+            mtype: 'POST',
+            height: 'auto',
+            jsonReader: {
+                root: "rows",
+                total: "totalpages",
+                page: "currpage",
+                records: "totalrecords",
+                repeatitems: false
+            },
+            colNames: ['key', '工单号', '车牌', '车主姓名', '业务类别', '车型', '进场时间', '接待人员', '工单状态'],
+            colModel: [
+                {name: 'hwid', index: 'hwid', key: true, hidden: true, search: false},
+                {
+                    name: 'hwserialno',
+                    index: 'hwserialno',
+                    hidden: false,
+                    search: false,
+                    width: 150,
+                    align: 'center',
+                    formatter: function (cell, opt, rowdata) {
+                        var str = "";
+                        str += "<a style='color:blue;' href='javascript:void(0);' onclick='opendetail(\"" + rowdata.hwid + "\")'>" + cell + "</a>";
+                        return str;
+                    }
+                },
+                {
+                    name: 'carplate',
+                    index: 'carplate',
+                    width: 100,
+                    sortable: true,
+                    search: false,
+                    editable: false,
+                    align: 'center'
+                },
+                {
+                    name: 'carownername',
+                    index: 'carownername',
+                    width: 100,
+                    hidden: false,
+                    search: false,
+                    align: 'center'
+                },
+                {
+                    name: 'businesstypename',
+                    index: 'businesstypename',
+                    width: 100,
+                    hidden: false,
+                    search: false,
+                    align: 'center'
+                },
+                {name: 'cartypename', index: 'cartypename', hidden: false, search: false, align: 'center'},
+                {name: 'hwenterdtm', index: 'hwenterdtm', hidden: false, search: false, align: 'center'},
+                {
+                    name: 'acceptstaffname',
+                    index: 'acceptstaffname',
+                    width: 100,
+                    hidden: false,
+                    search: false,
+                    align: 'center'
+                },
+                {
+                    name: 'orderstatusname',
+                    index: 'orderstatusname',
+                    width: 100,
+                    hidden: false,
+                    search: false,
+                    align: 'center'
+                }
+            ],
+            rowNum: 10,
+            rowList: [10, 20, 40],
+            pager: '#pager1',
+            viewrecords: true,
+            caption: "在场车辆",
+            toolbar: [true, "top"],
+            rownumbers: true,
+            rownumWidth: 40
+        });
+
+    });
+
+</script>
+    <div id="searchdiv" style="display: flex; margin-top: 2px;">
+        <div class="searchdiv">
+            <div class="searchlabel">车牌</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_carplate_input" class="searchinputtext" type="text"></div>
+        </div>
+
+        <div class="searchdiv">
+            <div class="searchlabel">车主姓名</div>
+            <div class="searchlabeli">:</div>
+            <div class="searchinput"><input name="info_owner_input" class="searchinputtext" type="text"></div>
+        </div>
+    </div>
+
+    <div id="carlistdiv"><table id="carlist"></table> <div id="pager1"></div></div>
+
+    <div id="accesscardiv" style="display: none">
+        <div>
+            <div class="inputbaselabel">
+                <label>车牌：</label>
+                <input type="text" name="carplate" placeholder="请输入车牌"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>车主姓名：</label>
+                <input type="text" name="carowner" placeholder="请输入车主姓名"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>车主电话：</label>
+                <input type="text" name="carownerphone" placeholder="请输入车主电话"/>
+            </div>
+
+
+            <div class="inputbaselabel">
+                <label>当前里程：</label>
+                <input type="text" name="carmile" placeholder="请输入当前里程"/>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>车型：</label>
+                <input type="text" name="cartype" placeholder="请输入车型"/>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>业务类别：</label>
+                <select name="businesstypeselect">
+                    <option value="0">---请选择---</option>
+                </select>
+            </div>
+
+            <div class="inputbaselabel">
+                <label>工单内容：</label>
+                <textarea style="vertical-align: top;" rows="3" cols="20" name="orderdesc" placeholder="请输入本次工单内容"></textarea>
+            </div>
+
+        </div>
+        <div id="searchsubmitdiv" style="display: flex">
+            <div class="warehouse_btn" id="newcar_submitbtn">开单接车</div>
+        </div>
+    </div>
+</body>
+</html>
