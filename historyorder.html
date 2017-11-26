@@ -96,7 +96,7 @@
                 records: "totalrecords",
                 repeatitems: false
             },
-            colNames: ['key', '工单号', '车牌', '车主姓名', '业务类别', '车型', '进场时间', '接待人员', '工单状态'],
+            colNames: ['key', '工单号', '车牌', '车主姓名', '业务类别', '车型','应收金额','实收金额', '进场时间', '接待人员', '工单状态'],
             colModel: [
                 {name: 'hwid', index: 'hwid', key: true, hidden: true, search: false},
                 {
@@ -104,7 +104,7 @@
                     index: 'hwserialno',
                     hidden: false,
                     search: false,
-                    width: 150,
+                    width: 120,
                     align: 'center',
                     formatter: function (cell, opt, rowdata) {
                         var str = "";
@@ -115,7 +115,7 @@
                 {
                     name: 'carplate',
                     index: 'carplate',
-                    width: 100,
+                    width: 80,
                     sortable: true,
                     search: false,
                     editable: false,
@@ -124,7 +124,7 @@
                 {
                     name: 'carownername',
                     index: 'carownername',
-                    width: 100,
+                    width: 80,
                     hidden: false,
                     search: false,
                     align: 'center'
@@ -132,12 +132,20 @@
                 {
                     name: 'businesstypename',
                     index: 'businesstypename',
-                    width: 100,
+                    width: 80,
                     hidden: false,
                     search: false,
                     align: 'center'
                 },
                 {name: 'cartypename', index: 'cartypename', hidden: false, search: false, align: 'center'},
+                {name: 'hwtotalamount', index: 'hwtotalamount', hidden: false, search: false, align: 'center', width:70,
+                    formatter: function (cell, opt, rowdata) {
+                        return rowdata.hwtotalamount + "元"
+                    }},
+                {name: 'hwpayamount', index: 'hwpayamount', hidden: false, search: false, align: 'center', width:70,
+                    formatter: function (cell, opt, rowdata) {
+                        return rowdata.hwpayamount + "元"
+                    }},
                 {name: 'hwenterdtm', index: 'hwenterdtm', hidden: false, search: false, align: 'center'},
                 {
                     name: 'acceptstaffname',
