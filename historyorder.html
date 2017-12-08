@@ -166,6 +166,34 @@
             rownumWidth: 40
         });
 
+        $("#historylistsearchbtn").click(function () {
+            var hwserialno = $("input[name='orderno_search_input']").val();
+            var hmccarplate = $("input[name='carplate_search_input']").val();
+            var hmcownername = $("input[name='owner_search_input']").val();
+            var businesstypename = $("input[name='business_search_input']").val();
+            var cartypename = $("input[name='cartype_search_input']").val();
+            var hwenterdtm = $("input[name='entry1_search_input']").val();
+            var hwenterdtm2 = $("input[name='entry2_search_input']").val();
+            var hwtakecardtm = $("input[name='take1_search_input']").val();
+            var hwtakecardtm2 = $("input[name='take2_search_input']").val();
+
+            var searchobj = {};
+            searchobj.hwserialno = hwserialno;
+            searchobj.hmccarplate = hmccarplate;
+            searchobj.hmcownername = hmcownername;
+            searchobj.businesstypename = businesstypename;
+            searchobj.cartypename = cartypename;
+            searchobj.hwenterdtm = hwenterdtm.replace("-","");
+            searchobj.hwenterdtm2 = hwenterdtm2.replace("-","");
+            searchobj.hwtakecardtm = hwtakecardtm.replace("-","");
+            searchobj.hwtakecardtm2 = hwtakecardtm2.replace("-","");
+            searchobj.hwstatus = -1;
+
+            $("#orderhislist").jqGrid("setGridParam",{
+                postData:{data:JSON.stringify(searchobj)},
+                page:1
+            }).trigger("reloadGrid");
+        });
     });
 
 </script>
@@ -206,15 +234,15 @@
         <div class="searchdiv">
             <div class="searchlabel">进场时间</div>
             <div class="searchlabeli">:</div>
-            <div class="searchinput"><input name="entry1_search_input" class="searchinputtext" type="text"></div>
-            <div class="searchinput"><input name="entry2_search_input" class="searchinputtext" type="text"></div>
+            <div class="searchinput"><input name="entry1_search_input" class="searchinputtext" type="text" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true})"></div>~
+            <div class="searchinput"><input name="entry2_search_input" class="searchinputtext" type="text" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true})"></div>
         </div>
 
         <div class="searchdiv">
             <div class="searchlabel">交车时间</div>
             <div class="searchlabeli">:</div>
-            <div class="searchinput"><input name="take1_search_input" class="searchinputtext" type="text"></div>
-            <div class="searchinput"><input name="take2_search_input" class="searchinputtext" type="text"></div>
+            <div class="searchinput"><input name="take1_search_input" class="searchinputtext" type="text" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true})"></div>~
+            <div class="searchinput"><input name="take2_search_input" class="searchinputtext" type="text" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true})"></div>
         </div>
 
         <div class="searchbtndiv">

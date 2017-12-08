@@ -159,6 +159,7 @@
                 data: {data: JSON.stringify(data)},
                 success: function (d) {
                     layer.closeAll();
+                    reloadCarinfoDiv();
                     $("#carlist").trigger("reloadGrid");
                 }
             });
@@ -199,21 +200,6 @@
             }
         });
     });
-//
-//    function opendetail(orderid) {
-//        curorderid = orderid;
-//        $.ajax({
-//            url:orderdetailurl,
-//            type:"GET",
-//            success:function(data){
-//                $("#mainbody").html(data);
-//            },
-//            error:function(XmlHttpRequest, textStatus, errorThrown){
-//                alert("error:");
-//                $("#mainbody").html("error");
-//            }
-//        });
-//    }
 
     function reloadCarinfoDiv() {
         $("input[name='carplate']").val("");
